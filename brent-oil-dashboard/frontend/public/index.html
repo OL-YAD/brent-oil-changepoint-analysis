@@ -1,0 +1,142 @@
+import { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Activity, TrendingUp, DollarSign } from 'lucide-react';
+
+const Dashboard = () => {
+  const [oilPrices, setOilPrices] = useState([]);
+  const [economicData, setEconomicData] = useState([]);
+  const [correlations, setCorrelations] = useState({});
+
+  useEffect(() => {
+    // Fetch oil prices
+    fetch('http://localhost:5000/api/oil-prices')
+      .then(res => res.json())
+      .then(data => {
+        const formattedData = data.dates.map((date, i) => ({
+          date,
+          price: data.prices[i]
+        }));
+        setOilPrices(formattedData);
+      });
+
+    // Fetch economic indicators
+    fetch('http://localhost:5000/api/economic-indicators')
+      .then(res => res.json())
+      .then(data => setEconomicData(data.data));
+
+    // Fetch correlations
+    fetch('http://localhost:5000/api/correlation-analysis')
+      .then(res => res.json())
+      .then(data => setCorrelations(data.correlations));
+  }, []);
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8">Brent Oil Price Analysis Dashboard</h1>
+      
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Current Price
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ${oilPrices[oilPrices.length - 1]?.price.toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Price Change (%)
+            </CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {oilPrices.length > 1 ? (
+                ((oilPrices[oilPrices.length - 1]?.price - oilPrices[oilPrices.length - 2]?.price) / 
+                oilPrices[oilPrices.length - 2]?.price * 100).toFixed(2)
+              ) : 0}%
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Trend
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {oilPrices.length > 0 && 
+               oilPrices[oilPrices.length - 1]?.price > oilPrices[oilPrices.length - 2]?.price 
+               ? 'Upward' : 'Downward'}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Price Chart */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Historical Oil Prices</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px]">
+            <LineChart
+              width={800}
+              height={400}
+              data={oilPrices}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="price" 
+                stroke="#8884d8" 
+                name="Price (USD)"
+              />
+            </LineChart>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Correlation Analysis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Economic Indicator Correlations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {Object.entries(correlations).map(([indicator, value]) => (
+              <div 
+                key={indicator} 
+                className="p-4 border rounded-lg"
+              >
+                <h3 className="font-medium text-sm">{indicator}</h3>
+                <p className="text-2xl font-bold">
+                  {(value * 100).toFixed(1)}%
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Dashboard;
