@@ -16,3 +16,30 @@ Developed for Birhan Energies, a leading energy sector consultancy firm, this pr
 - Statistical modeling using Bayesian inference
 - Interactive dashboard for data visualization
 - Comprehensive analysis of external factors affecting oil prices
+
+
+## Project Structure
+
+```
+brent-oil-changepoint-analysis/
+│
+├── scripts/
+│   ├── oil_analysis_utils.py
+|   ├── economic_analysis.py
+|   ├── price_forcasting.py
+│   └── README.md
+├── notebooks/
+│   ├── exploratory_analysis.ipynb
+│   ├── economic_indicators_analysis.ipynb
+│   ├── price_forecasting.ipynb
+│   └── README.md
+├── brent-oil-dashboard/    # directory for flask dashboard
+├── tests/
+├── requirements.txt    # all dependencies 
+└── README.md
+```
+
+## Data Sources
+- Primary Brent oil price data (1987-2022)
+- Economic indicators from World Bank api
+
